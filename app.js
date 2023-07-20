@@ -31,6 +31,17 @@ app.post('/api/projects',(req,res)=>{
     }
 })
 
+app.get('/api/projects/:id',(req,res)=>{
+    const {id} = req.params;
+    console.log(id);
+    let item = projects.find((project)=>project.id===Number(id));
+    if(item){
+        res.json(item);
+    }else{
+        res.status(404).send('Not found');
+    }
+})
+
 app.listen(port,()=>{
     console.log(`Server started on port ${port}`);
 })

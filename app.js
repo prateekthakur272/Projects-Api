@@ -1,32 +1,34 @@
 const express = require('express');
 const {projects} = require('./data.js')
-const path = require('path');
 
 const port = 3000;
 const app = express()
 
 app.use(express.static('./static'));
+app.use(express.urlencoded({extended:true}))
 
-app.get('/projects', (req,res)=>{
-    res.status(200).json(projects)
-})
-
-app.get('/projects-min', (req,res)=>{
-    let projectsMin = projects.map((project)=>{
-        const {title,description} = project;
-        return {title,description};
-    });
-    res.status(200).json(projectsMin);
-})
-
-app.get('/projects/:projectId',(req,res)=>{
-    console.log(req.params);
-    let project = projects.find((project) => project.id === Number(req.params.projectId));
-    if (!project) {
-        res.status(404).send('Does not exist')
+app.get('/api/projects',(req,res)=>{
+    let responses = projects;
+    let {id,title} = req.query;
+    console.log(req.query);
+    if(id){
+        responses = projects.find((project)=>project.id===Number(id));
     }
-    console.log(project);
-    res.status(200).json(project);
+    if(title){
+        responses = projects.filter((project)=>project.title.toLowerCase().startsWith(title.toLowerCase()))
+    }
+    res.json(responses)
+})
+
+app.post('/api/projects',(req,res)=>{
+    const {title,id,description} = req.body
+    console.log(title,id,description);
+    if(title && id && description){
+        projects.push(req.body)
+        res.status(201).json(req.body)
+    }else{
+        res.status(403).json({status:false})
+    }
 })
 
 app.listen(port,()=>{
